@@ -1,0 +1,418 @@
+basePath: /
+definitions:
+  dtos.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  dtos.LoginRequest:
+    properties:
+      password:
+        maxLength: 10
+        minLength: 5
+        type: string
+      username:
+        maxLength: 10
+        minLength: 5
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.Blog:
+    properties:
+      author:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      title:
+        maxLength: 100
+        minLength: 5
+        type: string
+      updated_at:
+        type: string
+    required:
+    - author
+    - content
+    - title
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      firstName:
+        maxLength: 100
+        minLength: 5
+        type: string
+      id:
+        type: integer
+      lastName:
+        maxLength: 100
+        minLength: 5
+        type: string
+      phone:
+        type: string
+      updated_at:
+        type: string
+      userName:
+        type: string
+    required:
+    - firstName
+    - lastName
+    - phone
+    - userName
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: shyam@shyam.com
+    name: Shyam
+  description: This app deals with blog CRUD APIs
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://www.shyam.com/terms/
+  title: Blogs API
+  version: "1.0"
+paths:
+  /api/blogs/:
+    get:
+      description: Getting All Blogs
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Blog'
+            type: array
+      summary: Getting All Blogs
+      tags:
+      - Blogs
+    post:
+      consumes:
+      - application/json
+      description: Creating Blog Details
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: blog details
+        in: body
+        name: blog
+        required: true
+        schema:
+          $ref: '#/definitions/models.Blog'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Creating Blog Details
+      tags:
+      - Blogs
+  /api/blogs/{id}:
+    delete:
+      description: Deleting a Blog
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: blog id
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Deleting a Blog
+      tags:
+      - Blogs
+    get:
+      description: Getting a Blog
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: blog id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Blog'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Getting a Blog
+      tags:
+      - Blogs
+    put:
+      description: Updating a Blog
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: blog id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: blog details
+        in: body
+        name: blog
+        required: true
+        schema:
+          $ref: '#/definitions/models.Blog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Updating a Blog
+      tags:
+      - Blogs
+  /api/generate-token:
+    post:
+      consumes:
+      - application/json
+      description: Generating JWT Token by username/password
+      parameters:
+      - description: username/password of User
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Generating JWT Token by username/password
+      tags:
+      - Tokens
+  /api/users:
+    get:
+      description: Getting All Users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Getting All Users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Creating User Details
+      parameters:
+      - description: user details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Creating User Details
+      tags:
+      - Users
+  /api/users/{id}:
+    delete:
+      description: Deleting User by id in detail
+      parameters:
+      - description: id of User
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Deleting User by id
+      tags:
+      - Users
+    get:
+      description: Getting User by id in detail
+      parameters:
+      - description: id of User
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Getting User by id
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update User by id in detail
+      parameters:
+      - description: id of User
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request of Updating User Object
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Update User by id
+      tags:
+      - Users
+swagger: "2.0"

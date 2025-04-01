@@ -1,0 +1,28 @@
+{{define "home"}}
+
+{{ range .Blogs }}
+<div class="card mb-2">
+    <!-- <img src="..." class="card-img-top" alt="..."> -->
+    <div class="card-header">
+        <div class="row">
+            <div class="col">
+                <span class="fw-bold text-success">
+                    {{.Author}}
+                </span>
+                <span class="fst-italic">
+                    {{ .CreatedAt }}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">
+            {{.Title}}
+        </h5>
+        <p class="card-text">
+            {{.Content}}
+        </p>
+    </div>
+</div>
+{{ end }}
+{{ end }}
