@@ -1,18 +1,27 @@
 {{define "home"}}
 
-{{ range .Blogs }}
+{{$loggedInUserId := .userId }}
+{{ range .blogs }}
 <div class="card mb-2">
     <!-- <img src="..." class="card-img-top" alt="..."> -->
     <div class="card-header">
         <div class="row">
             <div class="col">
                 <span class="fw-bold text-success">
-                    {{.Author}}
+                    {{.Author.FistName}}
                 </span>
                 <span class="fst-italic">
                     {{ .CreatedAt }}
                 </span>
             </div>
+            {{ if eq $loggedInUserId .Author.Id }}
+            <div class="col justify-content-end">
+                <a class="btn btn-outline-primary btn-sm"
+                   href="/blog/{{.Id}}">Edit</a>
+                <a class="btn btn-outline-danger btn-sm"
+                   href="/blog/delete/{{.Id}}">Delete</a>
+            </div>
+            {{ end }}
         </div>
     </div>
     <div class="card-body">

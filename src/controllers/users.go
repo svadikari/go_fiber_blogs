@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"go_fiber_blogs/src/database"
 	"go_fiber_blogs/src/dtos"
@@ -19,24 +18,26 @@ import (
 //	@Tags			Users
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body		models.User	true	"user details"
+//	@Param			request	body		dtos.UserRequest	true	"user details"
 //	@Success		201		{object}	models.User
 //	@Failure		400		{object}	dtos.ErrorResponse
 //	@Failure		500		{object}	dtos.ErrorResponse
 //	@Router			/api/users [post]
 
 func (c *Controller) CreateUser(ctx *fiber.Ctx) error {
-	user := new(models.User)
-	if err := ctx.BodyParser(user); err != nil {
+	userRequest := new(dtos.UserRequest)
+	if err := ctx.BodyParser(userRequest); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.NewError(fiber.StatusBadRequest))
 	}
 	validator := middleware.XValidator{}
-	if errs := validator.Validate(user); errs != nil {
+	if errs := validator.Validate(userRequest); errs != nil {
 		return &fiber.Error{
 			Code:    fiber.ErrBadRequest.Code,
 			Message: strings.Join(errs, ","),
 		}
 	}
+	user := &models.User{FistName: userRequest.FistName, LastName: userRequest.LastName, Phone: userRequest.Phone,
+		UserName: userRequest.UserName, Password: utils.GenerateHash(userRequest.Password)}
 	db := database.DB.Db
 	err := db.Create(&user).Error
 	if err != nil {
@@ -81,7 +82,7 @@ func (c *Controller) GetUser(ctx *fiber.Ctx) error {
 	userId, _ := ctx.ParamsInt("id")
 	var user models.User
 	db := database.DB.Db
-	db.Find(&user, "id=?", userId)
+	db.Model(&models.User{}).Preload("Blogs").Find(&user, "id=?", userId)
 	if db.Error != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.NewError(fiber.StatusInternalServerError))
 	}
@@ -100,7 +101,7 @@ func (c *Controller) GetUser(ctx *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			Authorization	header		string		true	"Bearer Token"
 //	@Param			id		path		uint		true	"id of User"
-//	@Param			request	body		models.User	true	"Request of Updating User Object"
+//	@Param			request	body		dtos.UserRequest	true	"Request of Updating User Object"
 //	@Success		200		{object}	models.User
 //	@Failure		400		{object}	dtos.ErrorResponse
 //	@Failure		404		{object}	dtos.ErrorResponse
@@ -115,7 +116,7 @@ func (c *Controller) UpdateUser(ctx *fiber.Ctx) error {
 	if dbUser.Id == 0 {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.NewError(fiber.StatusNotFound))
 	}
-	inputUser := new(models.User)
+	inputUser := new(dtos.UserRequest)
 	if err := ctx.BodyParser(inputUser); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.NewError(fiber.StatusBadRequest))
 	}
@@ -145,7 +146,7 @@ func (c *Controller) DeleteUser(ctx *fiber.Ctx) error {
 	db := database.DB.Db
 	err := db.Delete(&user, "id=?", userId).Error
 	if err != nil {
-		return ctx.Status(fiber.StatusNotFound).JSON(fiber.NewError(fiber.StatusNotFound))
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.NewError(fiber.StatusNotFound, err.Error()))
 	}
 	return ctx.Status(fiber.StatusNoContent).JSON(fiber.NewError(fiber.StatusNoContent))
 }
@@ -185,7 +186,6 @@ func (c *Controller) GenerateToken(ctx *fiber.Ctx) error {
 	}
 	token, err := middleware.CreateToken(&dbUser)
 	if err != nil {
-		fmt.Println(err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.NewError(fiber.StatusInternalServerError, err.Error()))
 	}
 	tokenResponse := new(dtos.TokenResponse)

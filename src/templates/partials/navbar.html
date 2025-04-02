@@ -12,21 +12,24 @@
       </div>
       <div class="offcanvas-body">
         <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+          {{ if ne .firstName nil }}
           <li class="nav-item">
-            <a class="nav-link text-primary active" href="/profile/1">Hi {{.userId}}</a>
+            <a class="nav-link text-primary active" href="/profile">Hi {{.firstName}}</a>
           </li>
           <li class="nav-item">
             <a class="nav-link text-primary active" href="/logout">Logout</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link text-primary active"  href="/create">New Blog</a>
+            <a class="nav-link text-primary active"  href="/blog">New Blog</a>
           </li>
+          {{else}}
           <li class="nav-item">
             <a class="nav-link text-primary active" aria-current="page" href="/login">Login</a>
           </li>
           <li class="nav-item">
             <a class="nav-link text-primary active" aria-current="page" href="/register">Register</a>
           </li>
+          {{end}}
         </ul>
       </div>
     </div>

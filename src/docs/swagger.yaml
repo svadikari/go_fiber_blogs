@@ -1,5 +1,17 @@
 basePath: /
 definitions:
+  dtos.BlogRequest:
+    properties:
+      content:
+        type: string
+      title:
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - content
+    - title
+    type: object
   dtos.ErrorResponse:
     properties:
       code:
@@ -21,10 +33,44 @@ definitions:
     - password
     - username
     type: object
+  dtos.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  dtos.UserRequest:
+    properties:
+      firstName:
+        maxLength: 100
+        minLength: 5
+        type: string
+      lastName:
+        maxLength: 100
+        minLength: 5
+        type: string
+      password:
+        maxLength: 10
+        minLength: 5
+        type: string
+      phone:
+        type: string
+      username:
+        maxLength: 10
+        minLength: 5
+        type: string
+    required:
+    - firstName
+    - lastName
+    - password
+    - phone
+    - username
+    type: object
   models.Blog:
     properties:
       author:
-        type: string
+        $ref: '#/definitions/models.User'
+      author_id:
+        type: integer
       content:
         type: string
       created_at:
@@ -38,12 +84,15 @@ definitions:
       updated_at:
         type: string
     required:
-    - author
     - content
     - title
     type: object
   models.User:
     properties:
+      blogs:
+        items:
+          $ref: '#/definitions/models.Blog'
+        type: array
       created_at:
         type: string
       firstName:
@@ -117,7 +166,7 @@ paths:
         name: blog
         required: true
         schema:
-          $ref: '#/definitions/models.Blog'
+          $ref: '#/definitions/dtos.BlogRequest'
       produces:
       - application/json
       responses:
@@ -213,7 +262,7 @@ paths:
         name: blog
         required: true
         schema:
-          $ref: '#/definitions/models.Blog'
+          $ref: '#/definitions/dtos.BlogRequest'
       produces:
       - application/json
       responses:
@@ -251,8 +300,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.TokenResponse'
         "400":
           description: Bad Request
           schema:
@@ -267,6 +318,12 @@ paths:
   /api/users:
     get:
       description: Getting All Users
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -301,7 +358,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/dtos.UserRequest'
       produces:
       - application/json
       responses:
@@ -324,6 +381,11 @@ paths:
     delete:
       description: Deleting User by id in detail
       parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: id of User
         in: path
         name: id
@@ -350,6 +412,11 @@ paths:
     get:
       description: Getting User by id in detail
       parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: id of User
         in: path
         name: id
@@ -382,6 +449,11 @@ paths:
       - application/json
       description: Update User by id in detail
       parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: id of User
         in: path
         name: id
@@ -392,7 +464,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/dtos.UserRequest'
       produces:
       - application/json
       responses:

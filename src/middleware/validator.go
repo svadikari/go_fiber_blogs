@@ -37,6 +37,9 @@ func (v XValidator) Validate(data interface{}) []string {
 				errorMessages = append(errorMessages, fmt.Sprintf("%s is required", fieldName))
 			case "email":
 				errorMessages = append(errorMessages, fmt.Sprintf("%s is not a valid email address", fieldName))
+			case "len":
+				errorMessages = append(errorMessages, fmt.Sprintf("%s must be %s character length",
+					fieldName, fe.Param()))
 			case "min":
 				errorMessages = append(errorMessages, fmt.Sprintf("%s must be greater than %s character length",
 					fieldName, fe.Param()))

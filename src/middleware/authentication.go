@@ -13,8 +13,9 @@ import (
 func CreateToken(user *models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"user": user.UserName,
-			"exp":  time.Now().Add(time.Minute * 2).Unix(),
+			"userId":    user.Id,
+			"firstName": user.FistName,
+			"exp":       time.Now().Add(time.Minute * 30).Unix(),
 		})
 	tokenString, err := token.SignedString([]byte(utils.GetEnvConfig("SECRET_KEY", "secured-secret-key")))
 	if err != nil {
@@ -23,14 +24,29 @@ func CreateToken(user *models.User) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+type Claims struct {
+	UserId    uint64 `json:"userId"`
+	FirstName string `json:"firstName"`
+	jwt.RegisteredClaims
+}
+
+func VerifyToken(tokenString string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return []byte(utils.GetEnvConfig("SECRET_KEY", "secured-secret-key")), nil
 	})
-	if err != nil || !token.Valid {
-		return fmt.Errorf("invalid token")
+	if err != nil {
+		return nil, err
 	}
-	return nil
+
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return claims, nil
 }
 
 func ValidateApiAuth(ctx *fiber.Ctx) error {
@@ -42,9 +58,12 @@ func ValidateApiAuth(ctx *fiber.Ctx) error {
 	if len(strArr) != 2 {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.NewError(fiber.StatusUnauthorized, "Provide valid token"))
 	}
-	if err := VerifyToken(strArr[1]); err != nil {
+	claims, err := VerifyToken(strArr[1])
+	if err != nil {
 		return ctx.Status(fiber.StatusForbidden).JSON(fiber.NewError(fiber.StatusUnauthorized, "invalid token"))
 	}
+	ctx.Locals("userId", claims.UserId)
+	ctx.Locals("firstName", claims.FirstName)
 	return ctx.Next()
 
 }
@@ -52,10 +71,14 @@ func ValidateApiAuth(ctx *fiber.Ctx) error {
 func ValidAuthentication(ctx *fiber.Ctx) error {
 	jwtToken := ctx.Cookies("jwtToken")
 	if jwtToken == "" {
-		return ctx.Redirect("/login", fiber.StatusUnauthorized)
+		return ctx.Redirect("/login", fiber.StatusTemporaryRedirect)
 	}
-	if err := VerifyToken(jwtToken); err != nil {
-		return ctx.Redirect("/login", fiber.StatusUnauthorized)
+
+	claims, err := VerifyToken(jwtToken)
+	if err != nil {
+		return ctx.Redirect("/login", fiber.StatusTemporaryRedirect)
 	}
+	ctx.Locals("userId", claims.UserId)
+	ctx.Locals("firstName", claims.FirstName)
 	return ctx.Next()
 }

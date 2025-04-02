@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gofiber/fiber/v2"
 	"go_fiber_blogs/src/database"
+	"go_fiber_blogs/src/dtos"
 	"go_fiber_blogs/src/middleware"
 	"go_fiber_blogs/src/models"
 	"strings"
@@ -17,24 +18,28 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			Authorization	header		string		true	"Bearer Token"
-//	@Param			blog			body		models.Blog	true	"blog details"
+//	@Param			blog			body		dtos.BlogRequest	true	"blog details"
 //	@Success		201				{object}	models.Blog
 //	@Failure		400				{object}	dtos.ErrorResponse
 //	@Failure		500				{object}	dtos.ErrorResponse
 //	@Router			/api/blogs/ [post]
 
 func CreateBlog(ctx *fiber.Ctx) error {
-	blog := new(models.Blog)
-	if err := ctx.BodyParser(blog); err != nil {
+	newBlog := new(dtos.BlogRequest)
+	if err := ctx.BodyParser(newBlog); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.NewError(fiber.StatusBadRequest))
 	}
 	validator := middleware.XValidator{}
-	if errs := validator.Validate(blog); errs != nil {
+	if errs := validator.Validate(newBlog); errs != nil {
 		return &fiber.Error{
 			Code:    fiber.ErrBadRequest.Code,
 			Message: strings.Join(errs, ","),
 		}
 	}
+	blog := models.Blog{}
+	blog.Title = newBlog.Title
+	blog.Content = newBlog.Content
+	blog.AuthorId = ctx.Locals("userId").(uint64)
 	db := database.DB.Db
 	err := db.Create(&blog).Error
 	if err != nil {
@@ -56,7 +61,7 @@ func CreateBlog(ctx *fiber.Ctx) error {
 func GetBlogs(ctx *fiber.Ctx) error {
 	var Blogs []models.Blog
 	db := database.DB.Db
-	db.Find(&Blogs)
+	db.Find(&Blogs).Preload("Author").Find(&Blogs)
 	return ctx.Status(fiber.StatusOK).JSON(Blogs)
 }
 
@@ -95,7 +100,7 @@ func GetBlog(ctx *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			Authorization	header		string		true	"Bearer Token"
 //	@Param			id				path		uint		true	"blog id"
-//	@Param			blog			body		models.Blog	true	"blog details"
+//	@Param			blog			body		dtos.BlogRequest	true	"blog details"
 //	@Success		200				{object}	models.Blog
 //	@Failure		400				{object}	dtos.ErrorResponse
 //	@Failure		404				{object}	dtos.ErrorResponse
@@ -110,7 +115,7 @@ func UpdateBlog(ctx *fiber.Ctx) error {
 	if dbBlog.Id == 0 {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.NewError(fiber.StatusNotFound))
 	}
-	inputBlog := new(models.Blog)
+	inputBlog := new(dtos.BlogRequest)
 	if err := ctx.BodyParser(inputBlog); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.NewError(fiber.StatusBadRequest))
 	}

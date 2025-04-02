@@ -1,0 +1,34 @@
+{{define "profile"}}
+<div class="container-fluid mt-3" style="width: 60%;">
+    <form action="/profile" method="POST">
+        <div class="mb-3 row">
+            <label for="firstName" class="col-sm-2 col-form-label">First Name</label>
+            <div class="col-sm-10">
+                <input type="text" required class="form-control" id="firstName" name="firstName" value="{{.FirstName}}">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="lastName" class="col-sm-2 col-form-label">Last Name</label>
+            <div class="col-sm-10">
+                <input type="text" required class="form-control" id="lastName" name="lastName" value="{{.LastName}}">
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="phone" class="col-sm-2 col-form-label">Phone</label>
+            <div class="col-sm-10">
+                <input type="text" required class="form-control" id="phone" name="phone" value="{{.Phone}}">
+            </div>
+        </div>
+        <div class="d-flex justify-content-center">
+            <div class="row">
+                <div class="col">
+                    <button class="btn btn-outline-primary" type="submit">Update</button>
+                </div>
+                <div class="col">
+                    <a class="btn btn-outline-warning" href="/">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{{end}}

@@ -20,7 +20,7 @@ A Go web application for blog management built with Fiber framework.
 | golang-jwt      | JWT token library                                         |
 | joho/godotenv   | To read environment variable/file                         |
 | Swagger         | [API Documentation](https://github.com/gofiber/swagger)   |
-| swaggo/swag     | Swagger cli to generat swagger documentation              |
+| swaggo/swag     | [Swagger Cli](https://github.com/swaggo/swag)             |
 | x/crypto        | Encryption/Decrytion library                              |
 | driver/postgres | PostGresql driver                                         |
 | gorm            | Go ORM for SQL drivers                                    |
@@ -50,13 +50,18 @@ go mod download
 APPLICATION_PORT=8080
 DB_CONNECTION_STRING=your_db_connection_string
 ```
-
 4. Run the application
 ```bash
 go run src/main.go
 ```
 
+## Generate swagger documentation
 
+Execute below commands form terminal where main.go file resides 
+- swag fmt (format files)
+- swag init --parseFuncBody (generates swagger.go/json/yml files under "docs" folder)
+
+## Application URLs
 The application will be available at `http://localhost:8080`
 
 ## API Documentation

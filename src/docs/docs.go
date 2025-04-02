@@ -80,7 +80,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Blog"
+                            "$ref": "#/definitions/dtos.BlogRequest"
                         }
                     }
                 ],
@@ -183,7 +183,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Blog"
+                            "$ref": "#/definitions/dtos.BlogRequest"
                         }
                     }
                 ],
@@ -280,8 +280,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.TokenResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -308,6 +311,15 @@ const docTemplate = `{
                     "Users"
                 ],
                 "summary": "Getting All Users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -357,7 +369,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/dtos.UserRequest"
                         }
                     }
                 ],
@@ -394,6 +406,13 @@ const docTemplate = `{
                 ],
                 "summary": "Getting User by id",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "id of User",
@@ -443,6 +462,13 @@ const docTemplate = `{
                 "summary": "Update User by id",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "id of User",
                         "name": "id",
@@ -455,7 +481,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/dtos.UserRequest"
                         }
                     }
                 ],
@@ -495,6 +521,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "id of User",
                         "name": "id",
                         "in": "path",
@@ -528,6 +561,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dtos.BlogRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 5
+                }
+            }
+        },
         "dtos.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -558,16 +608,61 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.TokenResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.UserRequest": {
+            "type": "object",
+            "required": [
+                "firstName",
+                "lastName",
+                "password",
+                "phone",
+                "username"
+            ],
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 5
+                },
+                "lastName": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 5
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 5
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 5
+                }
+            }
+        },
         "models.Blog": {
             "type": "object",
             "required": [
-                "author",
                 "content",
                 "title"
             ],
             "properties": {
                 "author": {
-                    "type": "string"
+                    "$ref": "#/definitions/models.User"
+                },
+                "author_id": {
+                    "type": "integer"
                 },
                 "content": {
                     "type": "string"
@@ -597,6 +692,12 @@ const docTemplate = `{
                 "userName"
             ],
             "properties": {
+                "blogs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Blog"
+                    }
+                },
                 "created_at": {
                     "type": "string"
                 },
